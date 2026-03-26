@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PI-5 Wearable IoT Dashboard</title>
+    <script src="/socket.io/socket.io.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        #frames { margin-bottom: 20px; }
+        #locations { margin-bottom: 20px; }
+        img { max-width: 300px; margin: 10px; }
+        .location { margin: 5px 0; }
+    </style>
+</head>
+<body>
+    <h1>Dashboard IoT ESP32 - Frames e Geolocalização</h1>
+
+    <h2>Frames Recebidos</h2>
+    <div id="frames"></div>
+
+    <h2>Geolocalização</h2>
+    <div id="locations"></div>
+
+    <script>
+        const socket = io();
+
+        socket.on('newFrame', (frame) => {
+            const framesDiv = document.getElementById('frames');
+            const img = document.createElement('img');
+            img.src = frame.data; // Assumindo que é base64 ou URL
+            framesDiv.appendChild(img);
+        });
+
+        socket.on('newLocation', (location) => {
+            const locationsDiv = document.getElementById('locations');
+            const p = document.createElement('p');
+            p.className = 'location';
+            p.textContent = `ID: ${location.id} - Lat: ${location.latitude}, Lon: ${location.longitude}`;
+            locationsDiv.appendChild(p);
+        });
+
+        // Carregar dados iniciais
+        fetch('/api/frames')
+            .then(res => res.json())
+            .then(frames => {
+                const framesDiv = document.getElementById('frames');
+                frames.forEach(frame => {
+                    const img = document.createElement('img');
+                    img.src = frame.data;
+                    framesDiv.appendChild(img);
+                });
+            });
+
+        fetch('/api/locations')
+            .then(res => res.json())
+            .then(locations => {
+                const locationsDiv = document.getElementById('locations');
+                locations.forEach(location => {
+                    const p = document.createElement('p');
+                    p.className = 'location';
+                    p.textContent = `ID: ${location.id} - Lat: ${location.latitude}, Lon: ${location.longitude}`;
+                    locationsDiv.appendChild(p);
+                });
+            });
+    </script>
+</body>
+</html>
